@@ -145,22 +145,33 @@
         </g>
       </svg>
     </div>
-    <div><canvas id="myChart"></canvas></div>
+
+    <div>
+      <h1 style="text-align: center">LONDON CITY DATA</h1>
+      <canvas id="myChart"></canvas>
+    </div>
   </body>
   <script>
     const ctx = document.getElementById("myChart").getContext("2d");
     let isFirst = true;
 
     const myChart = new Chart(ctx, {
-      type: "bar", // or any other chart type
+      type: "line", // or any other chart type
       data: {
         labels: [],
         datasets: [
           {
-            label: "Real-Time Data",
+            label: "Wind MPH",
             data: [],
             backgroundColor: "hsl(50, 80%, 50%)",
-            borderColor: "black",
+            borderColor: "hsl(50, 80%, 50%)",
+            borderWidth: 2,
+          },
+          {
+            label: "Wind KPH",
+            data: [],
+            backgroundColor: "hsl(23, 80%, 50%)",
+            borderColor: "hsl(23, 80%, 50%)",
             borderWidth: 2,
           },
         ],
@@ -185,15 +196,27 @@
         },
       },
     });
-
     setInterval(() => {
-      fetchNewData();
-    }, 1000); // Fetch new data every 1 seconds
+      fetchData();
+    }, 3000); // Fetch new data every 3 seconds
 
-    function fetchNewData() {
-      myChart.data.labels.push(myChart.data.labels.length);
-      myChart.data.datasets[0].data.push(Math.random() * 50);
-      myChart.update();
+    const url =
+      "http://api.weatherapi.com/v1/current.json?key=7ca768a7ef834e819f3182755240705&q=London&aqi=no";
+    const options = {
+      method: "GET",
+    };
+    fetchData();
+    async function fetchData() {
+      try {
+        const response = await fetch(url, options);
+        const result = await response.json();
+        myChart.data.labels.push(myChart.data.labels.length * 3);
+        myChart.data.datasets[0].data.push(result.current.wind_mph);
+        myChart.data.datasets[1].data.push(result.current.wind_kph);
+        myChart.update();
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     const path = anime.path("#path");
